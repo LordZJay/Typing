@@ -1,16 +1,19 @@
 :root {
-  --bg: #fff1f6;
-  --panel: #ffecf2;
-  --accent: #ff2d55; /* vivid red-pink */
-  --accent-2: #ff7aa2; /* lighter pink */
-  --text: #2b0b12;
-  --muted: #7a3a45;
-  --success: #0f9d58;
-  --danger: #e53935;
+  --bg: rgba(255, 241, 246, 0.9);
+  --panel: rgba(255, 236, 242, 0.6);
+  --accent: rgba(255, 45, 85, 0.85); /* vivid red-pink */
+  --accent-2: rgba(255, 122, 162, 0.6); /* lighter pink */
+  --text: rgba(43, 11, 18, 0.9);
+  --muted: rgba(43, 11, 18, 0.45);
+  --success: rgba(15, 157, 88, 0.85);
+  --danger: rgba(229, 57, 53, 0.85);
+  --glass: rgba(255, 255, 255, 0.25);
+  --shadow: rgba(0, 0, 0, 0.08);
 }
 
 * {
   box-sizing: border-box;
+  transition: all 0.25s ease-in-out;
 }
 
 body {
@@ -23,25 +26,28 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  backdrop-filter: blur(5px);
 }
 
 .app {
   width: 100%;
   max-width: 980px;
-  background: linear-gradient(180deg, var(--panel), #fff);
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(206, 69, 102, 0.15);
+  background: var(--glass);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px var(--shadow);
   overflow: hidden;
-  border: 2px solid rgba(255, 45, 85, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 header {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 18px 22px;
-  background: linear-gradient(90deg, rgba(255, 45, 85, 0.06), rgba(255, 125, 162, 0.03));
-  border-bottom: 1px solid rgba(255, 45, 85, 0.06);
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
 }
 
 .logo {
@@ -51,15 +57,16 @@ header {
 }
 
 .logo .mark {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 700;
+  font-size: 18px;
 }
 
 .title {
@@ -76,7 +83,7 @@ header {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 20px;
-  padding: 22px;
+  padding: 24px;
 }
 
 @media (max-width: 920px) {
@@ -86,34 +93,41 @@ header {
 }
 
 .panel {
-  background: white;
-  border-radius: 10px;
-  padding: 18px;
-  box-shadow: 0 6px 18px rgba(203, 60, 107, 0.06);
-  border: 1px solid rgba(255, 45, 85, 0.03);
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
 }
 
 .controls {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .btn {
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
   border: 0;
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
   color: white;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 4px 12px var(--shadow);
 }
 
 .btn.ghost {
   background: transparent;
   color: var(--accent);
-  border: 1px solid rgba(255, 45, 85, 0.08);
+  border: 1px solid rgba(255, 45, 85, 0.25);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--shadow);
 }
 
 .timer-select {
@@ -122,19 +136,25 @@ header {
 }
 
 .timer-select button {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(43, 11, 18, 0.06);
-  background: transparent;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(43, 11, 18, 0.1);
+  background: rgba(255, 255, 255, 0.25);
   cursor: pointer;
 }
 
+.timer-select button.active {
+  border-color: var(--accent);
+  background: rgba(255, 45, 85, 0.15);
+}
+
 .text-area {
-  min-height: 140px;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px dashed rgba(43, 11, 18, 0.06);
-  background: linear-gradient(180deg, #fff, #fff7fb);
+  min-height: 160px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px dashed rgba(43, 11, 18, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(3px);
 }
 
 .words {
@@ -146,36 +166,45 @@ header {
 .words span {
   padding: 2px 4px;
   border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
 .words span.current {
-  background: linear-gradient(90deg, rgba(255, 45, 85, 0.12), rgba(255, 125, 162, 0.06));
-  box-shadow: inset 0 -4px 0 rgba(255, 45, 85, 0.06);
+  background: rgba(255, 45, 85, 0.15);
+  box-shadow: inset 0 -4px 0 rgba(255, 45, 85, 0.08);
 }
 
 .words span.correct {
-  color: #0f9d58;
-  background: rgba(15, 157, 88, 0.06);
+  color: var(--success);
+  background: rgba(15, 157, 88, 0.15);
 }
 
 .words span.incorrect {
   color: var(--danger);
-  background: rgba(229, 57, 53, 0.04);
+  background: rgba(229, 57, 53, 0.12);
   text-decoration: underline wavy var(--danger);
 }
 
 .input-row {
   display: flex;
   gap: 12px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 input[type=text] {
   flex: 1;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(43, 11, 18, 0.06);
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(43, 11, 18, 0.1);
   font-size: 16px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(3px);
+}
+
+input[type=text]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 6px rgba(255, 45, 85, 0.3);
 }
 
 .sidebar {
@@ -188,10 +217,11 @@ input[type=text] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #fff, #fff8fa);
-  border: 1px solid rgba(255, 45, 85, 0.04);
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(3px);
 }
 
 .stat h4 {
@@ -217,10 +247,10 @@ input[type=text] {
 .history .row {
   display: flex;
   justify-content: space-between;
-  padding: 8px;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #fff, #fff6f9);
-  border: 1px solid rgba(255, 45, 85, 0.03);
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 footer {
@@ -228,7 +258,7 @@ footer {
   text-align: center;
   color: var(--muted);
   font-size: 13px;
-  border-top: 1px solid rgba(255, 45, 85, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .small {
