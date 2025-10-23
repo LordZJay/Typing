@@ -1,4 +1,4 @@
-// Simple typing test logic
+// --- Simple Typing Test Logic ---
 const WORDS = ("the quick brown fox jumps over the lazy dog " +
   "lorem ipsum dolor sit amet consectetur adipiscing elit " +
   "keyboard typing speed accuracy practice code chatgpt openai sample test").split(/\s+/).filter(Boolean);
@@ -21,22 +21,22 @@ document.querySelectorAll('.timer-select button').forEach(b => {
     b.classList.add('active');
     timeLimit = Number(b.dataset.time);
     timerEl.textContent = timeLimit + 's';
-  })
+    reset();
+  });
 });
 
 let words = [];
 let currentIndex = 0;
 let correct = 0;
 let incorrect = 0;
+let totalTypedChars = 0;
 let started = false;
 let remaining = timeLimit;
 let timerId = null;
-let totalTypedChars = 0;
 
+// --- Helper Functions ---
 function pickWords(count = 50) {
-  const arr = [];
-  for (let i = 0; i < count; i++) arr.push(WORDS[Math.floor(Math.random() * WORDS.length)]);
-  return arr;
+  return Array.from({ length: count }, () => WORDS[Math.floor(Math.random() * WORDS.length)]);
 }
 
 function renderWords() {
@@ -52,18 +52,47 @@ function renderWords() {
   if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
+function updateStats() {
+  const minutes = timeLimit / 60;
+  const wpm = Math.round(correct / minutes);
+  const accuracy = totalTypedChars ? Math.round(((totalTypedChars - incorrect) / totalTypedChars) * 100) : 100;
+  wpmEl.textContent = isFinite(wpm) ? wpm : 0;
+  accEl.textContent = accuracy + '%';
+  countsEl.textContent = `${correct} / ${incorrect}`;
+  renderHistory();
+}
+
+function saveHistory(record) {
+  const arr = JSON.parse(localStorage.getItem('lj_history') || '[]');
+  arr.unshift(record);
+  localStorage.setItem('lj_history', JSON.stringify(arr.slice(0, 50)));
+  renderHistory();
+}
+
+function renderHistory() {
+  const arr = JSON.parse(localStorage.getItem('lj_history') || '[]');
+  historyEl.innerHTML = '';
+  if (!arr.length) return historyEl.innerHTML = '<div class="small">No results yet</div>';
+  arr.slice(0, 8).forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<div style="font-weight:700">${r.wpm} WPM</div><div class="small">${r.accuracy}% • ${r.time}s</div>`;
+    historyEl.appendChild(row);
+  });
+}
+
 function reset() {
   clearInterval(timerId);
+  words = pickWords(70);
   currentIndex = 0;
   correct = 0;
   incorrect = 0;
   totalTypedChars = 0;
   started = false;
   remaining = timeLimit;
-  timerEl.textContent = remaining + 's';
   input.value = '';
   input.disabled = true;
-  words = pickWords(70);
+  timerEl.textContent = remaining + 's';
   renderWords();
   updateStats();
 }
@@ -73,13 +102,12 @@ function start() {
   started = true;
   input.disabled = false;
   input.focus();
-  remaining = timeLimit;
-  timerEl.textContent = remaining + 's';
-  const t0 = Date.now();
+  const startTime = Date.now();
+
   timerId = setInterval(() => {
-    remaining = Math.max(0, timeLimit - Math.floor((Date.now() - t0) / 1000));
+    remaining = Math.max(0, timeLimit - Math.floor((Date.now() - startTime) / 1000));
     timerEl.textContent = remaining + 's';
-    if (remaining <= 0) { endTest(); }
+    if (remaining <= 0) endTest();
   }, 200);
 }
 
@@ -89,62 +117,30 @@ function endTest() {
   started = false;
   const minutes = timeLimit / 60;
   const wpm = Math.round(correct / minutes);
-  const accuracy = totalTypedChars ? Math.round((Math.max(0, totalTypedChars - incorrectChars()) / totalTypedChars) * 100) : 100;
-  const rec = { date: new Date().toISOString(), wpm, accuracy, correct, incorrect, time: timeLimit };
-  saveHistory(rec);
+  const accuracy = totalTypedChars ? Math.round(((totalTypedChars - incorrect) / totalTypedChars) * 100) : 100;
+  const record = { date: new Date().toISOString(), wpm, accuracy, correct, incorrect, time: timeLimit };
+  saveHistory(record);
   updateStats();
-  showModalResult(rec);
+  setTimeout(() => alert(`Time's up!\nWPM: ${wpm}\nAccuracy: ${accuracy}%\nCorrect: ${correct} • Incorrect: ${incorrect}`), 100);
 }
 
-function incorrectChars() {
-  return incorrect * 5;
-}
-
-function updateStats() {
-  const minutes = timeLimit / 60;
-  const wpm = started ? Math.round((correct) / minutes * ((timeLimit - remaining) / timeLimit)) : Math.round(correct / minutes);
-  wpmEl.textContent = isFinite(wpm) ? wpm : 0;
-  const accuracy = totalTypedChars ? Math.round((Math.max(0, totalTypedChars - incorrectChars()) / totalTypedChars) * 100) : 100;
-  accEl.textContent = accuracy + '%';
-  countsEl.textContent = `${correct} / ${incorrect}`;
-  renderHistory();
-}
-
-function renderHistory() {
-  const arr = JSON.parse(localStorage.getItem('lj_history') || '[]');
-  historyEl.innerHTML = '';
-  if (arr.length === 0) historyEl.innerHTML = '<div class="small">No results yet</div>';
-  arr.slice(0, 8).forEach(r => {
-    const d = document.createElement('div');
-    d.className = 'row';
-    d.innerHTML = `<div style="font-weight:700">${r.wpm} WPM</div><div class="small">${r.accuracy}% • ${r.time}s</div>`;
-    historyEl.appendChild(d);
-  });
-}
-
-function saveHistory(rec) {
-  const arr = JSON.parse(localStorage.getItem('lj_history') || '[]');
-  arr.unshift(rec);
-  localStorage.setItem('lj_history', JSON.stringify(arr.slice(0, 50)));
-  renderHistory();
-}
-
-function showModalResult(rec) {
-  setTimeout(() => {
-    alert(`Time's up!\nWPM: ${rec.wpm}\nAccuracy: ${rec.accuracy}%\nCorrect: ${rec.correct} • Incorrect: ${rec.incorrect}`);
-  }, 100);
-}
-
-input.addEventListener('input', (e) => {
+// --- Input Event ---
+input.addEventListener('input', () => {
   if (!started) start();
   const val = input.value;
   const curWord = words[currentIndex] || '';
-  totalTypedChars = totalTypedChars + (val.length ? 1 : 0);
+  totalTypedChars += val.length ? 1 : 0;
+
   if (val.endsWith(' ') || val.endsWith('\n')) {
     const trimmed = val.trim();
     const span = wordsEl.querySelector(`span[data-idx="${currentIndex}"]`);
-    if (trimmed === curWord) { span.classList.add('correct'); correct++; }
-    else { span.classList.add('incorrect'); incorrect++; }
+    if (trimmed === curWord) {
+      span.classList.add('correct');
+      correct++;
+    } else {
+      span.classList.add('incorrect');
+      incorrect += curWord.length;
+    }
     span.classList.remove('current');
     currentIndex++;
     const next = wordsEl.querySelector(`span[data-idx="${currentIndex}"]`);
@@ -156,14 +152,16 @@ input.addEventListener('input', (e) => {
     const span = wordsEl.querySelector(`span[data-idx="${currentIndex}"]`);
     if (!span) return;
     const expected = curWord.substr(0, val.length);
-    if (val === expected) { span.classList.remove('incorrect'); span.classList.add('current'); }
-    else { span.classList.add('incorrect'); }
+    if (val === expected) span.classList.remove('incorrect');
+    else span.classList.add('incorrect');
   }
 });
 
+// --- Button Events ---
 startBtn.addEventListener('click', () => { reset(); start(); });
-restartBtn.addEventListener('click', () => { reset(); });
+restartBtn.addEventListener('click', reset);
 clearHistoryBtn.addEventListener('click', () => { localStorage.removeItem('lj_history'); renderHistory(); });
 
+// --- Init ---
 reset();
 renderHistory();
